@@ -20,16 +20,13 @@ Vagrant.configure("2") do |config|
 
   config.vm.box = settings["software"]["box"]
   config.vm.box_check_update = true
+  config.vm.synced_folder ".", "/vagrant", type: 'nfs', nfs_udp: false, nfs_version: 4
 
   config.vm.define "master" do |master|
     master.vm.hostname = "master-node"
     master.vm.network "private_network", ip: settings["network"]["control_ip"]
-    master.vm.provider "virtualbox" do |vb|
-        vb.cpus = settings["nodes"]["control"]["cpu"]
-        vb.memory = settings["nodes"]["control"]["memory"]
-        if settings["cluster_name"] and settings["cluster_name"] != ""
-          vb.customize ["modifyvm", :id, "--groups", ("/" + settings["cluster_name"])]
-        end
+    master.vm.provider "libvirt" do |libvirt|
+      libvirt.driver = "kvm"
     end
     master.vm.provision "shell",
       env: {
@@ -52,12 +49,8 @@ Vagrant.configure("2") do |config|
     config.vm.define "node0#{i}" do |node|
       node.vm.hostname = "worker-node0#{i}"
       node.vm.network "private_network", ip: IP_NW + "#{IP_START + i}"
-      node.vm.provider "virtualbox" do |vb|
-          vb.cpus = settings["nodes"]["workers"]["cpu"]
-          vb.memory = settings["nodes"]["workers"]["memory"]
-          if settings["cluster_name"] and settings["cluster_name"] != ""
-            vb.customize ["modifyvm", :id, "--groups", ("/" + settings["cluster_name"])]
-          end
+      node.vm.provider "libvirt" do |libvirt|
+        libvirt.driver = "kvm"
       end
       node.vm.provision "shell",
         env: {
