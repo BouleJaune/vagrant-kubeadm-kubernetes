@@ -20,6 +20,6 @@ nodes:
     memory: 2048
 software:
   box: generic/ubuntu2204
-  kubernetes: 1.26.1-00
+  kubernetes: 1.25.0-00
     #os: CentOS_8
   os: xUbuntu_22.04
